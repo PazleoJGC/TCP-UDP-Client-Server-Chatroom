@@ -30,7 +30,7 @@ void *serverListen(int sock){
 	
 	while(n = read(sock, buffer, sizeof(buffer)) > 0){
 		if(!strcmp(buffer, "quit")){
-				printf("serwer zakończył pracę\n");
+				printf("The server has closed.\n");
 				break;
 			}
 			printf("%s\n", buffer);
@@ -39,7 +39,7 @@ void *serverListen(int sock){
 	}
 	
 	endProgram = 1;
-	printf("Połączenie zostało przerwane przez serwer, program wyłączy się przy następnej próbie wysłania wiadomości.\n");
+	printf("Connection has been interrupted by server. Sending a message will close the application.\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -49,11 +49,11 @@ int main(int argc, char *argv[]) {
 	if(argc==3){
 		server_name = argv[1];
 		server_port = atoi(argv[2]);
-		printf("zastosowano wartości %s %d\n", server_name, server_port);
+		printf("Using values: %s %d\n", server_name, server_port);
 	}
 	else{
-		printf("użycie: \"./client server_name server_port\"\n");
-		printf("zastosowano domyślne wartości %s %d\n", server_name, server_port);
+		printf("Usage: \"./client server_name server_port\"\n");
+		printf("Using default values: %s %d\n", server_name, server_port);
 	}
 
 	struct sockaddr_in server_address;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	printf("Połączono, żeby zakończyć połączenie, wpisz komendę /quit\n");
+	printf("Connected. To end connection, send a /quit command.\n");
 
 	pthread_t sender;
 	pthread_create(&sender,NULL,(void *)serverSend,(void *)(sock));

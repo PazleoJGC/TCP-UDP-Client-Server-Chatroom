@@ -1,26 +1,30 @@
-kompilacja i wywołanie serwera:
+A chatroom application written in C.
+
+Server handles multiple connections from TCP and UDP clients. Messages that reach the server are relayed to all connected clients.
+
+compiling and starting the server:
 
 ```
 	gcc server.c -o server
 	./server port
 ```
 
-port jest opcjonalny, domyślnie przyjmuje wartość 8877
+port value is optional, default value is 8877
 
-kompilacja i wywołanie klienta tcp:
+compiling and starting a TCP client:
 
 ```
 	gcc client.c -o tcp -pthread
 	./tcp ip port
 ```
 
-ip i port są opcjonalne, ale jeżeli chce się je ustawić, to trzeba podać oba. Domyślnie są to localhost i 8877
+ip and port values are optional. Default values are localhost and 8877. In order to override them, both have to be set.
 
-kompilacja i wywołanie klienta udp:
+compiling and starting a UDP client:
 
 ```
 	gcc clientUDP.c -o udp -pthread
 	./udp ip port
 ```
 
-ip i port są opcjonalne, ale jeżeli chce się je ustawić, to trzeba podać oba. Domyślnie są to localhost i 8877
+ip and port values are optional. Default values are localhost and 8877. In order to override them, both have to be set.

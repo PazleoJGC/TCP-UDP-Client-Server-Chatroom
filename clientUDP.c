@@ -63,11 +63,11 @@ int main(int argc, char *argv[]) {
 	if(argc==3){
 		server_name = argv[1];
 		server_port = atoi(argv[2]);
-		printf("zastosowano wartości %s %d\n", server_name, server_port);
+		printf("Using values: %s %d\n", server_name, server_port);
 	}
 	else{
-		printf("użycie: \"./client server_name server_port\"\n");
-		printf("zastosowano domyślne wartości %s %d\n", server_name, server_port);
+		printf("Usage: \"./client server_name server_port\"\n");
+		printf("Using default values: %s %d\n", server_name, server_port);
 	}
   
     // Creating socket file descriptor
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     servaddr.sin_port = htons(server_port);
     servaddr.sin_addr.s_addr = INADDR_ANY;	
   
-	printf("Zostaniesz połączony po pierwszej wiadomości która trafi na serwer, żeby nie otrzymywać wiadomości od serwera, wpisz komendę /quit\n");
+	printf("You will be connected with server after your first message. To stop receiving messages, send a /quit command\n");
   
     int n;
       

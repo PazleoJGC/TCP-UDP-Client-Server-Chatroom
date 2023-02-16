@@ -13,20 +13,20 @@ struct sockaddr_in udp_client_list[MAX_UDP_SOCKS];
 fd_set fds, readfds, writefds;
  
 void broadcastMessage(char *message){
-	//wysyłamy do każdego użytkownika TCP
+	//Messaging all TCP users
 	for (int j = 0; j < FD_SETSIZE; j++) {
 		if (FD_ISSET(j, &writefds)){
 			if(j != udp_listen_sock && j != tcp_listen_sock){
-				printf("Wysyłam do klienta TCP %d\n", j);	
+				printf("Sending to TCP client %d\n", j);	
 				send(j, message, strlen(message), 0);
 			}
 		}
 	}
-	//wysyłamy do każdego zarejestrowanego użytkownika UDP
+	//Messaging all registered UDP users
 	for (int j = 0; j < MAX_UDP_SOCKS; j++){
 		if(udp_client_list[j].sin_port == 0)
 			continue;
-		printf("Wysyłam do klienta UDP %s:%d\n", inet_ntoa(udp_client_list[j].sin_addr), ntohs(udp_client_list[j].sin_port));
+		printf("Sending to UDP client %s:%d\n", inet_ntoa(udp_client_list[j].sin_addr), ntohs(udp_client_list[j].sin_port));
 		sendto(udp_listen_sock, message, strlen(message), 
 			MSG_CONFIRM, (const struct sockaddr *) &udp_client_list[j],
 				sizeof(udp_client_list[j]));
@@ -50,13 +50,12 @@ int main(int argc, char *argv[]) {
 	int server_port = 8877;
 	
 	if(argc==2){
-		//server_name = argv[1];
 		server_port = atoi(argv[1]);
-		printf("zastosowano wartości %s %d\n", "localhost", server_port);
+		printf("Using values: %s %d\n", "localhost", server_port);
 	}
 	else{
-		printf("użycie: \"./server server_port\"\n");
-		printf("zastosowano domyślne wartości %s %d\n", "localhost", server_port);
+		printf("Usage: \"./server server_port\"\n");
+		printf("Using default values: %s %d\n", "localhost", server_port);
 	}
 
 	// socket address used for the server
@@ -120,23 +119,23 @@ int main(int argc, char *argv[]) {
 		for (int i = 0; i < FD_SETSIZE; i++) {
 			if (FD_ISSET(i, &readfds)){
 				if (i == tcp_listen_sock){
-					//klienci TCP rejestrowani są przed wysłaniem pierwszej wiadomości
+					//TCP clients are registered before their first message
 					if (numsocks < max_tcp_socks){
 						int clientaddrlen;
 						tcp_client_sock[numsocks] = accept(tcp_listen_sock,(struct sockaddr *) &clientaddr,(socklen_t *)&clientaddrlen);
 						printf("accepted sock %d\n", tcp_client_sock[numsocks]);
 						FD_SET(tcp_client_sock[numsocks], &fds);
 						numsocks++;
-						printf("dodano klienta tcp\n");
+						printf("tcp client added\n");
 					}
 					else{
-						printf("Koniec wolnych miejsc.\n");
+						printf("No more empty slots.\n");
 					}
 				}
 				else{
 					bzero(buffer, sizeof(buffer));
 					if (i == udp_listen_sock){
-						//klienci UDP rejestrowani są przy odbiorze ich pierwszej wiadomości
+						//UDP clients are registered upon the first message
 						int len, n;
 						len = sizeof(&client_address);  //len is value/resuslt
 						n = recvfrom(udp_listen_sock, (char *)buffer, maxlen, 
@@ -156,11 +155,11 @@ int main(int argc, char *argv[]) {
 							if((udp_client_list[j].sin_port == client_address.sin_port) && (udp_client_list[j].sin_addr.s_addr == client_address.sin_addr.s_addr)){
 								if(disconnect==1){
 									udp_client_list[j].sin_port = 0;
-									printf("rozłączono klienta UDP %d\n", client_address.sin_port);
+									printf("UDP client %d disconnected.\n", client_address.sin_port);
 									if(j<udpcurrent)
 										udpcurrent = j;
-										//ustawia indeks jako następny do nadpisania jeżeli jest wcześniejszy,
-										//w przeciwnym razie odbywa się to zgodnie z kolejnością
+										//if an earlier index is available/open, use it.
+										//otherwise, take next empty slot.
 									break;
 								}
 								else{
@@ -172,10 +171,9 @@ int main(int argc, char *argv[]) {
 						
 						if(disconnect==1)
 							continue;
-							//pomija dalszą sekwencję wysyłania
 						
 						if(found==0){
-							printf("dodano klienta UDP %d\n", client_address.sin_port);
+							printf("UDP client %d connected.\n", client_address.sin_port);
 							udp_client_list[udpcurrent] = client_address;
 							udpcurrent = (udpcurrent + 1) % MAX_UDP_SOCKS;
 						}
@@ -183,15 +181,14 @@ int main(int argc, char *argv[]) {
 						sprintf(response, "%d => %s", client_address.sin_port, buffer);
 					}
 					else{
-						//jeżeli wiadomość nie jest od klienta udp, odczytujemy ją
+						//if the message is not from a UDP client, read it immediately.
 						read(i, buffer, maxlen);
 						
 						if(!strcmp(buffer, "/quit")){
 							FD_CLR(i, &fds);
 							close(i);
-							printf("Klient TCP %d rozłączył się.\n", i);
+							printf("TCP client %d disconnected.\n", i);
 							continue;
-							//pomija dalszą sekwencję wysyłania
 						}
 						
 						sprintf(response, "%d => %s", i, buffer);
